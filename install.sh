@@ -161,7 +161,7 @@ function updateSystem {
 # Function to install the Technic Solder dependencies
 function installSolderDeps {
 	export APT_LISTCHANGES_FRONTEND=none
-	apt-get install mysql-server php5 php5-fpm php5-mysql php5-cli php5-curl php5-mcrypt php5-apcu php5-sqlite git perl nginx curl wget -y
+	apt-get install mysql-server php5 php5-fpm php5-mysql php5-cli php5-curl php5-mcrypt php5-apcu php5-sqlite git perl nginx curl wget nodejs npm -y
 }
 
 # Function to automatically setup MySQL
@@ -268,9 +268,10 @@ function setupTechnicSolder {
   cd /home/solder/
 
   echo -e "\nCloning TechnicSolder...";
-  git clone https://github.com/TechnicPack/TechnicSolder.git
-  cd TechnicSolder
-  composer install --no-dev --no-interaction
+  git clone https://github.com/solderio/solder.git TechnicSolder
+  cd TechnicSolder && composer install --no-dev && npm install --only=production
+  npm run production
+  php artisan solder:install
 
   echo -e "\nConfiguring Solder...";
   # Writing the solder configs
