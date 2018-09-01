@@ -161,7 +161,11 @@ function updateSystem {
 # Function to install the Technic Solder dependencies
 function installSolderDeps {
 	export APT_LISTCHANGES_FRONTEND=none
-	apt-get install mysql-server php5 php5-fpm php5-mysql php5-cli php5-curl php5-mcrypt php5-apcu php5-sqlite git perl nginx curl wget nodejs npm -y
+	apt-get install software-properties-common python-software-properties
+	apt-get purge `dpkg -l | grep php| awk '{print $2}' |tr "\n" " "`
+	add-apt-repository ppa:ondrej/php
+	apt-get update 
+	apt-get install mysql-server php5.6 php5.6-fpm php5.6-mysql php5.6-cli php5.6-curl php5.6-mcrypt php5.6-apcu php5.6-sqlite3 git perl nginx curl wget nodejs npm -y
 }
 
 # Function to automatically setup MySQL
@@ -222,19 +226,19 @@ function setupNginx {
 
 # Function for setting up php5-fpm
 function setupPhp {
-  local phpdir="/etc/php5/";
+  local phpdir="/etc/php/5.6/";
   local fpmdir="fpm/";
-  echo -e "\nBacking up php5-fpm config...";
+  echo -e "\nBacking up php5.6-fpm config...";
   cp -r $phpdir$fpmdir"php.ini" $phpdir$fpmdir"php.ini~"
 
   echo -e "\nSetting new php5-fpm config...";
   echo "cgi.fix_pathinfo=0" > $phpdir$fpmdir"php.ini";
 
   echo -e "\nEnabling php5-mcrypt...";
-  php5enmod mcrypt
+  phpenmod mcrypt
 
   echo -e "\nRestarting the php5-fpm service..."
-  service php5-fpm restart
+  service php5.6-fpm restart
 }
 
 function installComposer {
@@ -268,10 +272,10 @@ function setupTechnicSolder {
   cd /home/solder/
 
   echo -e "\nCloning TechnicSolder...";
-  git clone https://github.com/solderio/solder.git TechnicSolder
-  cd TechnicSolder && composer install --no-dev && npm install --only=production
-  npm run production
-  php artisan solder:install
+  git clone https://github.com/TechnicPack/TechnicSolder.git
+  composer install --no-dev --no-interaction
+  php artisan migrate:install
+  php artisan migrate
 
   echo -e "\nConfiguring Solder...";
   # Writing the solder configs
